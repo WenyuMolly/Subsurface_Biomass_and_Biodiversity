@@ -1,6 +1,6 @@
 ## Depth and Temperature Fits
 
-gridCells = read.csv("metadata_by_grid.csv",stringsAsFactors = FALSE)
+gridCells = read.csv("metadata_with_merged_depth.csv",stringsAsFactors = FALSE)
 GreenlandFID = c(3774:3776,3759:3762,3737:3742,3711:3715,3681:3685,3639:3643,3584:3588,3522:3525,3452:3454,3378:3380)
 AntarcFID = 3791:4163 
 
@@ -15,7 +15,7 @@ all$cellsPer = as.numeric(all$cellsPer) # in cell cm-3
 myIndices = as.matrix(read.csv("1000_indices_for_bootstrap.csv",header=FALSE))
 myIndices=myIndices
 bootstraps = nrow(myIndices)
-depthsToIterate = gridCells$Z122_Med_HF_km*1000 # in meters
+depthsToIterate = gridCells$maxdepth*1000 # in meters
 
 
 AntarcFID = 3791:4163 # These are FID_1 on TC's documents already corrected in CM
@@ -165,3 +165,6 @@ for (n in 1:nrow(myIndices)) {
 }
 proc.time() - ptm
 
+write.table(lm.biomass,file = "lm_with_merged_depth.biomass.csv",sep=",",row.names=FALSE,col.names=FALSE)
+write.table(lm.error,file = "lm_with_merged_depthtempZ122_Med_HF_lm.error.csv",sep=",",row.names=FALSE,col.names=FALSE)
+write.table(lm.byGridResult, file = 'lm_with_merged_depthtempZ122_Med_HF_lm_GridResult.csv',sep=',',row.names=FALSE,col.names=FALSE)

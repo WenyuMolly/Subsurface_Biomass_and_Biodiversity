@@ -9,7 +9,7 @@ library(nlstools)
 ####################################
 ### 1) OPEN AND FORMAT FILES
 ####################################
-gridCells = read.csv("metadata_by_grid.csv",stringsAsFactors = FALSE)
+gridCells = read.csv("metadata_with_merged_depth.csv",stringsAsFactors = FALSE)
 GreenlandFID = c(3774:3776,3759:3762,3737:3742,3711:3715,3681:3685,3639:3643,3584:3588,3522:3525,3452:3454,3378:3380)
 AntarcFID = 3791:4163 
 gridCells$rechargeType = gridCells$rechargeDepth
@@ -36,7 +36,7 @@ all$cellsPer = as.numeric(all$cellsPer) # in cell cm-3
 # load indices selected for bootstraps
 myIndices = as.matrix(read.csv("1000_indices_for_bootstrap.csv",header=FALSE))
 bootstraps = nrow(myIndices)
-depthsToIterate = gridCells$Z122_Med_HF_km*1000 # in meters
+depthsToIterate = gridCells$maxdepth*1000 # in meters
 
 ####################################
 ## 4) DEFINE OUTPUTS
@@ -128,7 +128,7 @@ for (n in 1:nrow(myIndices)) {
       patch = patch[rep(seq_len(nrow(patch)), each=length(mySlices)),]
       patch$Depth = as.numeric(mySlices)
       patch$Depth = as.numeric(log10(mySlices))
-      if(patch$FID%in%c(GreenlandFID,AntarcFID)){patch$temperature = 0 + mySlices*(gridCells[i,]$Median_HF/1000)/gridCells[i,]$Therm_Cond__W_per_m_K}
+      if(patch$FID[1]%in%c(GreenlandFID,AntarcFID)){patch$temperature = 0 + mySlices*(gridCells[i,]$Median_HF/1000)/gridCells[i,]$Therm_Cond__W_per_m_K}
       else{
       patch$temperature = gridCells[i,]$MEAN_Annual_Temp + mySlices*(gridCells[i,]$Median_HF/1000)/gridCells[i,]$Therm_Cond__W_per_m_K}
       patch$dummy = rep(1,nrow(patch))
