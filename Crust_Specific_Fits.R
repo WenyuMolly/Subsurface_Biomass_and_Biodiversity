@@ -16,7 +16,7 @@ gridCells$combined_cr = factor(gridCells$combined_cr)
 gridCells$rechargeShort = factor(gridCells$rechargeShort)
 
 
-df.trimmed = read.csv("cores_with_PCR.csv")
+df.trimmed = read.csv("metadata_with_merged_depth.csv")
 # Select direct measurements only
 all = df.trimmed[which(df.trimmed$MethodCM=="direct"),]
 # makes sure all parameters are in correct format

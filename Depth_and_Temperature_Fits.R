@@ -4,7 +4,7 @@ gridCells = read.csv("metadata_with_merged_depth.csv",stringsAsFactors = FALSE)
 GreenlandFID = c(3774:3776,3759:3762,3737:3742,3711:3715,3681:3685,3639:3643,3584:3588,3522:3525,3452:3454,3378:3380)
 AntarcFID = 3791:4163 
 
-df.trimmed = read.csv("cores_with_PCR.csv")
+df.trimmed = read.csv("cores_with_gradient_filled.csv")
 # Select direct measurements only
 all = df.trimmed[which(df.trimmed$MethodCM=="direct"),]
 all$Depth = as.numeric(all$Depth) # in meters
@@ -43,6 +43,9 @@ lm.byGridResult = data.frame(matrix(NA, nrow =nrow(gridCells), ncol = bootstraps
 temperature.parameters = data.frame(matrix(NA,nrow=bootstraps,ncol=2))
 lm.parameters = data.frame(matrix(NA,nrow=bootstraps,ncol=2))
 
+temperature.r2 = vector(length = bootstraps)
+lm.r2 = vector(length = bootstraps)
+
 ####################################
 ### 5) BEGIN BOOTSTRAP LOOP
 ####################################
@@ -60,7 +63,7 @@ for (n in 1:nrow(myIndices)) {
   
   
   ## MAKE temperature vector based on maps. This model is good. when used to predict temperatures in real dataset,Adjusted R-squared = 0.91
-  all$temperature = all$mast + all$Depth*(all$medianHF/1000)/all$tcon
+  all$temperature = all$mast + all$Depth*gridCells$gradient
   
 
   
@@ -82,7 +85,9 @@ for (n in 1:nrow(myIndices)) {
   
   powerResult = predict(powerFit,test.temp)
   
-  
+  ss_res_temp = sum((test.temp$cellsPer - powerResult)^2)
+  ss_tot_temp = sum((test.temp$cellsPer - mean(test.temp$cellsPer))^2)
+  temperature.r2[n] = 1 - ss_res_temp / ss_tot_temp
   
   a =  powerFit$coefficients[1]
   slope = powerFit$coefficients[2]
@@ -130,6 +135,10 @@ for (n in 1:nrow(myIndices)) {
   powerFit = lm(cellsPer~Depth,data=pf.train)
   #  pf.x = data.frame(test$Depth)
   powerResult = predict(powerFit,pf.test)
+
+  ss_res_lm = sum((pf.test$cellsPer - powerResult)^2)
+  ss_tot_lm = sum((pf.test$cellsPer - mean(pf.test$cellsPer))^2)
+  lm.r2[n] = 1 - ss_res_lm / ss_tot_lm
   a =  powerFit$coefficients[1]
   b = powerFit$coefficients[2]
   
@@ -168,3 +177,9 @@ proc.time() - ptm
 write.table(lm.biomass,file = "lm_with_merged_depth.biomass.csv",sep=",",row.names=FALSE,col.names=FALSE)
 write.table(lm.error,file = "lm_with_merged_depthtempZ122_Med_HF_lm.error.csv",sep=",",row.names=FALSE,col.names=FALSE)
 write.table(lm.byGridResult, file = 'lm_with_merged_depthtempZ122_Med_HF_lm_GridResult.csv',sep=',',row.names=FALSE,col.names=FALSE)
+write.table(lm.parameters, file = 'lm_with_merged_depthtempZ122_Med_HF_lm_parameters.csv',sep=',',row.names=FALSE,col.names=FALSE)
+
+write.table(temperature.biomass, file = "temperature_model_total_biomass.csv", sep = ",", row.names = FALSE, col.names = FALSE)
+write.table(temperature.error, file = "temperature_model_error.csv", sep = ",", row.names = FALSE, col.names = FALSE)
+write.table(temperature.byGridResult, file = "temperature_model_grid_result.csv", sep = ",", row.names = FALSE, col.names = FALSE)
+write.table(temperature.parameters, file = "temperature_model_parameters.csv", sep = ",", row.names = FALSE, col.names = FALSE)
